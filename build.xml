@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="simovex" default="jar" basedir=".">
+    <description>Simple Movie Export.</description>
+
+    <target name="properties">
+        <property name="src" value="src/main/java"/>
+        <property name="test" value="src/test/java"/>
+        <property name="platform.dir" location="platform/${os.name}"/>
+        <property name="platform.bin" location="${platform.dir}/bin"/>
+        <property name="lib" value="lib"/>
+        <property name="build" value="build"/>
+        <property name="build.prod" location="${build}/prod"/>
+        <property name="build.test" location="${build}/test"/>
+        <property name="build.doc" location="${build}/doc"/>
+        <property name="dist" value="dist"/>
+
+        <path id="project.classpath">
+            <pathelement location="${build.prod}"/>
+            <pathelement location="${build.test}"/>
+            <fileset dir="${lib}">
+                <include name="*.jar"/>
+            </fileset>
+        </path>
+    </target>
+
+    <target name="init" depends="properties">
+        <mkdir dir="${build.prod}"/>
+        <mkdir dir="${build.test}"/>
+        <mkdir dir="${build.doc}"/>
+        <mkdir dir="${dist}"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac destdir="${build.prod}" source="1.5" target="1.5">
+            <src path="${src}"/>
+            <classpath refid="project.classpath"/>
+        </javac>
+    </target>
+
+    <target name="compile-tests" depends="compile">
+        <javac srcdir="${test}" destdir="${build.test}" source="1.5" target="1.5">
+            <classpath refid="project.classpath"/>
+        </javac>
+    </target>
+
+    <target name="test" depends="compile-tests">
+        <junit haltonfailure="true">
+            <classpath refid="project.classpath"/>
+            <formatter type="brief" usefile="false"/>
+            <batchtest>
+                <fileset dir="${build.test}" includes="**/*Test.class"/>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${dist}/lib"/>
+        <jar jarfile="${dist}/lib/${ant.project.name}.jar" basedir="${build.prod}"/>
+    </target>
+
+    <target name="javadoc" depends="properties" description="Generates API documentation">
+        <javadoc destdir="${build.doc}">
+            <packageset dir="${src}">
+                <include name="simovex/**"/>
+            </packageset>
+            <doctitle><![CDATA[<h1>Simple Movie Export</h1>]]></doctitle>
+        </javadoc>
+    </target>
+
+    <target name="clean" depends="properties">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+</project>

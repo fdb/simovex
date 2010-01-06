@@ -1,0 +1,1 @@
+Simovex is a simple wrapper around FFMPEG (http://fmpeg.org/). Its goal is to make exporting movies as simple as possible. FFMPEG binaries for the most common platforms are provided.

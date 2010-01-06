@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Simovex - Simple Movie Export</title>
+</head>
+<body>
+<p>Simovex is a simple wrapper around <a href="http://ffmpeg.org/" target="_top">FFMPEG</a>.
+    Its goal is to make exporting movies as simple as possible. FFMPEG binaries
+    for the most common platforms are provided.</p>
+
+<p>To export a movie, use the class like this:</p>
+<pre>
+Movie m = new Movie("hello.mp4", 640, 480);
+for (BufferedImage img: listOfImages) {
+    m.addFrame(img);
+}
+m.save();
+</pre>
+</body>
+</html>
