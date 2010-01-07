@@ -57,7 +57,13 @@ public class Movie {
 
     static {
         String osName = System.getProperty("os.name").split("\\s")[0];
-        FFMPEG_BINARY = new File(String.format("platform/%s/bin/ffmpeg", osName));
+        // If we provide a binary for this system, use it. Otherwise, see if a default "ffmpeg"  binary exists.
+        File packagedBinary = new File(String.format("platform/%s/bin/ffmpeg", osName));
+        if (packagedBinary.exists()) {
+            FFMPEG_BINARY = packagedBinary;
+        } else {
+            FFMPEG_BINARY = new File("/usr/bin/ffmpeg");
+        }
         codecTypeMap = new HashMap<CodecType, String>(CodecType.values().length);
         codecTypeMap.put(CodecType.ANIMATION, "qtrle");
         codecTypeMap.put(CodecType.FLV, "flv");
