@@ -42,7 +42,8 @@ public class MovieTest extends TestCase {
      * Test if the movie can be successfully created.
      */
     public void testSave() {
-        Movie m = createMovie("test.mp4", 2);
+        Movie m = createMovie("test.mov", 2);
+        m.setVerbose(true);
         m.save();
         assertFalse(m.temporaryFileForFrame(0).exists());
         assertFalse(m.temporaryFileForFrame(1).exists());
@@ -53,7 +54,7 @@ public class MovieTest extends TestCase {
      * Test if all files are cleaned up.
      */
     public void testCleanup() {
-        Movie m = createMovie("test.mp4", 2);
+        Movie m = createMovie("test.mov", 2);
         m.cleanup();
         assertFalse(m.temporaryFileForFrame(0).exists());
         assertFalse(m.temporaryFileForFrame(1).exists());

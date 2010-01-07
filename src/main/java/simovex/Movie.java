@@ -20,6 +20,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -37,7 +40,7 @@ import java.util.Random;
 public class Movie {
 
     public static enum CodecType {
-        FLV, H263, H264, MPEG4, ANIMATION, RAW, THEORA, WMV
+        ANIMATION, FLV, H263, H264, MPEG4, RAW, THEORA, WMV
     }
 
     public static enum CompressionQuality {
@@ -47,11 +50,28 @@ public class Movie {
 
     private static final File FFMPEG_BINARY;
     private static final String TEMPORARY_FILE_PREFIX = "sme";
+    private static final String FFMPEG_PRESET_TEMPLATE = "res/ffpresets/libx264-%s.ffpreset";
+    private static final Map<CodecType, String> codecTypeMap;
+    private static final Map<CompressionQuality, String> compressionQualityMap;
+
 
     static {
         String osName = System.getProperty("os.name");
         String osArch = System.getProperty("os.arch");
         FFMPEG_BINARY = new File(String.format("platform/%s/bin/ffmpeg.%s", osName, osArch));
+        codecTypeMap = new HashMap<CodecType, String>(CodecType.values().length);
+        codecTypeMap.put(CodecType.ANIMATION, "qtrle");
+        codecTypeMap.put(CodecType.FLV, "flv");
+        codecTypeMap.put(CodecType.H263, "h263");
+        codecTypeMap.put(CodecType.H264, "libx264");
+        codecTypeMap.put(CodecType.MPEG4, "mpeg4");
+        codecTypeMap.put(CodecType.RAW, "rawvideo");
+        codecTypeMap.put(CodecType.WMV, "wmv");
+        compressionQualityMap = new HashMap<CompressionQuality, String>(CompressionQuality.values().length);
+        compressionQualityMap.put(CompressionQuality.LOW, "baseline");
+        compressionQualityMap.put(CompressionQuality.MEDIUM, "default");
+        compressionQualityMap.put(CompressionQuality.HIGH, "hq");
+        compressionQualityMap.put(CompressionQuality.BEST, "lossless_max");
     }
 
     private String movieFilename;
@@ -82,6 +102,18 @@ public class Movie {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
+    }
+
+    public int getFrameCount() {
+        return frameCount;
     }
 
     public String getMovieFilename() {
@@ -124,7 +156,35 @@ public class Movie {
     public void save() {
         StringWriter sw = new StringWriter();
         PrintWriter out = new PrintWriter(sw, true);
-        ProcessBuilder pb = new ProcessBuilder(FFMPEG_BINARY.getAbsolutePath(), "-i", temporaryFileTemplate, "-b", "1000k", "-y", movieFilename);
+
+        String type = codecTypeMap.get(codecType);
+        int bitRate = bitRateForSize(width, height);
+        String quality = compressionQualityMap.get(compressionQuality);
+
+
+        ArrayList<String> commandList = new ArrayList<String>();
+        commandList.add(FFMPEG_BINARY.getAbsolutePath());
+        commandList.add("-y"); // Overwrite target if exists
+        commandList.add("-i");
+        commandList.add(temporaryFileTemplate); // Input images
+        commandList.add("-vcodec");
+        commandList.add(type); // Target video codec
+        if (codecType == CodecType.H264) {
+            commandList.add("-fpre");
+            commandList.add(String.format(FFMPEG_PRESET_TEMPLATE, quality));
+        } else {
+            commandList.add("-b");
+            commandList.add(bitRate + "k"); // Target bit rate
+        }
+        commandList.add(movieFilename); // Target file name
+
+        ProcessBuilder pb = new ProcessBuilder(commandList);
+        if (verbose) {
+            for (String cmd : pb.command()) {
+                System.out.print(cmd + " ");
+            }
+            System.out.println();
+        }
         pb.redirectErrorStream(true);
         Process p;
         try {
@@ -144,6 +204,10 @@ public class Movie {
             cleanupAndThrowException(e);
         }
         cleanup();
+    }
+
+    private int bitRateForSize(int width, int height) {
+        return 1000;
     }
 
     /**
@@ -170,7 +234,8 @@ public class Movie {
         int width = 640;
         int height = 480;
         // Create a new movie.
-        Movie movie = new Movie("test.mp4", width, height, CodecType.H264, CompressionQuality.BEST, true);
+        Movie movie = new Movie("test.mov", width, height);
+        movie.setVerbose(true);
         /// Initialize an image to draw on.
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = (Graphics2D) img.getGraphics();
