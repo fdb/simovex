@@ -56,9 +56,8 @@ public class Movie {
 
 
     static {
-        String osName = System.getProperty("os.name");
-        String osArch = System.getProperty("os.arch");
-        FFMPEG_BINARY = new File(String.format("platform/%s/bin/ffmpeg.%s", osName, osArch));
+        String osName = System.getProperty("os.name").split("\\s")[0];
+        FFMPEG_BINARY = new File(String.format("platform/%s/bin/ffmpeg", osName));
         codecTypeMap = new HashMap<CodecType, String>(CodecType.values().length);
         codecTypeMap.put(CodecType.ANIMATION, "qtrle");
         codecTypeMap.put(CodecType.FLV, "flv");
