@@ -3,8 +3,8 @@
     <description>Simple Movie Export.</description>
 
     <target name="properties">
-        <property name="src" value="src/main/java"/>
-        <property name="test" value="src/test/java"/>
+        <property name="src" value="src"/>
+        <property name="test" value="test"/>
         <property name="platform.dir" location="platform/${os.name}"/>
         <property name="platform.bin" location="${platform.dir}/bin"/>
         <property name="lib" value="lib"/>
