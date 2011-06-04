@@ -58,7 +58,10 @@ public class Movie {
     static {
         String osName = System.getProperty("os.name").split("\\s")[0];
         // If we provide a binary for this system, use it. Otherwise, see if a default "ffmpeg"  binary exists.
-        File packagedBinary = new File(String.format("platform/%s/bin/ffmpeg", osName));
+        String binaryName = "ffmpeg";
+        if (osName.equals("Windows"))
+            binaryName = "ffmpeg.exe";
+        File packagedBinary = new File(String.format("platform/%s/bin/%s", osName, binaryName));
         if (packagedBinary.exists()) {
             FFMPEG_BINARY = packagedBinary;
         } else {
